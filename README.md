@@ -4,6 +4,14 @@
 
 ---
 
+## Screenshots
+
+| Login Page | Dashboard & File Management |
+|:---:|:---:|
+| ![Login](https://raw.githubusercontent.com/mark392a-ux/secure-cloud-project/main/docs/screenshots/login.png) | ![Dashboard](https://raw.githubusercontent.com/mark392a-ux/secure-cloud-project/main/docs/screenshots/dashboard.png) |
+
+---
+
 ## Features
 
 - **User authentication** — registration, login, password hashing with auto-migration of plaintext credentials at next login
