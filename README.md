@@ -1,47 +1,89 @@
-# SecVault - Secure Cloud File Vault
+# SecVault — Secure Cloud File Vault
 
-SecVault is a Flask web app for encrypted file storage on AWS S3.  
-Each uploaded file is encrypted before upload and can later be downloaded as a password-protected ZIP.
+> A Flask web app for encrypted file storage on AWS S3, featuring Diffie-Hellman key exchange, AES encryption, and password-protected ZIP downloads.
+
+---
 
 ## Features
-- User registration and login
-- Password hashing for stored user credentials
-- File upload, listing, and deletion per user
-- Client-side style encryption flow using Diffie-Hellman key exchange + AES encryption
-- Download preparation that creates a password-protected ZIP using `pyzipper`
-- Basic upload/encryption timing stats
+
+- **User authentication** — registration, login, password hashing with auto-migration of plaintext credentials at next login
+- **Encrypted file storage** — Diffie-Hellman key exchange + AES encryption before every S3 upload
+- **File management** — upload, list, and delete files per user
+- **Secure downloads** — files packaged as password-protected ZIPs via `pyzipper`
+- **Session key management** — per-user session keys stored separately from file data
+- **Upload stats** — basic encryption and upload timing metrics
+
+---
 
 ## Tech Stack
-- Python + Flask
-- AWS S3 (`boto3`)
-- `cryptography` (DH + AES)
-- `pyzipper`
+
+| Layer | Technology |
+|---|---|
+| Backend | Python, Flask |
+| Cloud Storage | AWS S3 (boto3) |
+| Cryptography | Diffie-Hellman key exchange, AES (cryptography lib) |
+| Downloads | pyzipper (password-protected ZIP) |
+| Frontend | HTML, CSS, JavaScript |
+
+---
 
 ## Project Structure
+
 ```text
-.
-|- app.py
-|- s3_utils.py
-|- crypto_utils.py
-|- sessions_key.py
-|- templates/
-|  |- login.html
-|  |- register.html
-|  |- index.html
-|- requirements.txt
-|- .env.example
+secure-cloud-project/
+├── app.py              # Flask app entrypoint and routes
+├── crypto_utils.py     # DH key exchange + AES encryption/decryption
+├── s3_utils.py         # AWS S3 upload/download/delete helpers
+├── sessions_key.py     # Per-user session key management
+├── templates/
+│   ├── login.html
+│   ├── register.html
+│   └── index.html
+├── requirements.txt
+├── .env.example        # Environment variable template
+└── .gitignore
 ```
 
-## Setup
-1. Create and activate a virtual environment.
-2. Install dependencies:
+---
+
+## Installation
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/mark392a-ux/secure-cloud-project.git
+cd secure-cloud-project
+```
+
+**2. Create and activate a virtual environment**
+
+```bash
+python -m venv venv
+```
+
+Windows PowerShell:
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+macOS / Linux:
+```bash
+source venv/bin/activate
+```
+
+**3. Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file using `.env.example` as a guide.
-4. Set required environment variables:
+**4. Configure environment variables**
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in your values:
 
 ```env
 FLASK_SECRET_KEY=replace-with-a-long-random-value
@@ -52,32 +94,51 @@ AWS_ACCESS_KEY_ID=your-access-key-id
 AWS_SECRET_ACCESS_KEY=your-secret-access-key
 ```
 
-5. Run:
+**5. Run the app**
 
 ```bash
 python app.py
 ```
 
-6. Open:
+Open `http://127.0.0.1:5000` in your browser.
 
-```text
-http://127.0.0.1:5000
-```
+---
 
 ## Security Notes
-- Do not commit `.env`, `users.json`, `file_keys.json`, or generated ZIP/temp files.
-- This repo is now configured with `.gitignore` to exclude local secrets and runtime artifacts.
-- `app.secret_key` is loaded from `FLASK_SECRET_KEY` for deployment safety.
-- Existing plaintext user passwords are auto-migrated to hashed values at next successful login.
 
-## GitHub Push Checklist
-- Confirm AWS credentials are only in environment variables.
-- Confirm `.env` is not committed.
-- Review `git status` before each commit.
-- Add a remote and push:
+- AWS credentials live only in environment variables — never hardcoded
+- `.env`, `users.json`, `file_keys.json`, and generated ZIP/temp files are excluded via `.gitignore`
+- `app.secret_key` is loaded from `FLASK_SECRET_KEY` at runtime
+- Plaintext passwords in existing `users.json` are auto-migrated to hashed values on next successful login
+- Always run `git status` before committing to confirm no secrets are staged
 
-```bash
-git remote add origin <your-repo-url>
-git branch -M main
-git push -u origin main
-```
+---
+
+## What I Learned
+
+- Implementing cryptographic protocols (Diffie-Hellman + AES) in a real application
+- Integrating AWS S3 with Python using `boto3`
+- Applying Flask security best practices: password hashing, session management, secret key loading
+- Handling encrypted file lifecycles — upload, storage, and secure download
+
+---
+
+## Roadmap
+
+- [ ] Two-factor authentication (2FA)
+- [ ] Shareable download links with expiration
+- [ ] Audit logging and activity monitoring
+- [ ] Migrate from JSON to SQLite / PostgreSQL
+- [ ] Docker + CI/CD pipeline
+
+---
+
+## License
+
+MIT License — see [LICENSE](./LICENSE) for details.
+
+---
+
+## Contact
+
+For questions or feedback, open a GitHub Issue or submit a pull request.
