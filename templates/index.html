@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecVault Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f8f9ff;
+            --surface: #ffffff;
+            --primary: #4f46e5;       /* Indigo-600 */
+            --primary-dark: #4338ca;
+            --success: #10b981;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .top-bar {
+            background: var(--surface);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .top-bar b { font-weight: 600; font-size: 1.25rem; }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .alert-card {
+            background: rgba(79, 70, 229, 0.08);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+
+        h3 {
+            margin: 0 0 1.25rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .file-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .file-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .file-emoji { font-size: 2.25rem; margin-bottom: 0.75rem; display: block; }
+        .file-name { font-weight: 500; margin-bottom: 0.75rem; }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.25rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover { background: #059669; }
+
+        .danger {
+            color: #ef4444;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .danger:hover { color: #dc2626; text-decoration: underline; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td:first-child {
+            font-weight: 500;
+            color: var(--text-muted);
+            width: 40%;
+        }
+
+        .password-box {
+            font-family: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            background: rgba(255,255,255,0.7);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .grid { grid-template-columns: 1fr; }
+            .container { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div><b>🔐 SecVault</b></div>
+    <div>👤 {{ user }} | <a href="/logout" class="danger">Logout</a></div>
+</div>
+
+<div class="container">
+
+    {% if last_password %}
+    <div class="card alert-card">
+        <h3>🔐 Download Ready</h3>
+        <div>Your ZIP file is protected with this password:</div>
+        <div class="password-box">{{ last_password }}</div>
+        <a href="/download-zip" class="btn btn-success">⬇ Download Encrypted ZIP</a>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h3>📤 Upload New File</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" required style="margin-bottom:1rem; width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:8px;">
+            <button type="submit" class="btn">Upload File</button>
+        </form>
+    </div>
+
+    {% if stats %}
+    <div class="card">
+        <h3>📊 Last Upload Stats</h3>
+        <table>
+            <tr><td>File</td><td>{{ stats.filename }}</td></tr>
+            <tr><td>Size</td><td>{{ stats.size | filesizeformat if stats.size else stats.size ~ ' bytes' }}</td></tr>
+            <tr><td>Encryption</td><td>{{ stats.encryption }} seconds</td></tr>
+            <tr><td>Upload</td><td>{{ stats.upload }} seconds</td></tr>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if history and history|length > 0 %}
+    <div class="card">
+        <h3>📈 Upload Performance Trend</h3>
+        <canvas id="perfChart" height="140"></canvas>
+    </div>
+
+    <script>
+    const historyData = {{ history | tojson }};
+    const labels = historyData.map((_, i) => `Upload ${i+1}`);
+    const enc = historyData.map(x => x.encryption);
+    const up  = historyData.map(x => x.upload);
+
+    const ctx = document.getElementById("perfChart").getContext("2d");
+
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Encryption Time (s)",
+                    data: enc,
+                    borderColor: "#4f46e5",
+                    backgroundColor: "rgba(79,70,229,0.12)",
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: "#4f46e5"
+                },
+                {
+                    label: "Upload Time (s)",
+                    data: up,
+                    borderColor: "#10b981",
+                    backgroundColor: "rgba(16,185,129,0.12)",
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: "#10b981"
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: "top" } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.04)" } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+    </script>
+    {% endif %}
+
+    <h3>📸 Photos</h3>
+    <div class="grid">
+        {% for f in photos %}
+        <div class="file-card">
+            <span class="file-emoji">🖼️</span>
+            <div class="file-name">{{ f }}</div>
+            <a href="/prepare-download/{{ f }}" class="btn">Prepare Download</a>
+            <br><br>
+            <a href="/delete/{{ f }}" class="danger">Delete</a>
+        </div>
+        {% endfor %}
+        {% if not photos %}<p style="color:var(--text-muted); text-align:center;">No photos yet.</p>{% endif %}
+    </div>
+
+    <h3>🎥 Videos</h3>
+    <div class="grid">
+        {% for f in videos %}
+        <div class="file-card">
+            <span class="file-emoji">🎬</span>
+            <div class="file-name">{{ f }}</div>
+            <a href="/prepare-download/{{ f }}" class="btn">Prepare Download</a>
+            <br><br>
+            <a href="/delete/{{ f }}" class="danger">Delete</a>
+        </div>
+        {% endfor %}
+        {% if not videos %}<p style="color:var(--text-muted); text-align:center;">No videos yet.</p>{% endif %}
+    </div>
+
+    <h3>📄 Documents</h3>
+    <div class="grid">
+        {% for f in documents %}
+        <div class="file-card">
+            <span class="file-emoji">📄</span>
+            <div class="file-name">{{ f }}</div>
+            <a href="/prepare-download/{{ f }}" class="btn">Prepare Download</a>
+            <br><br>
+            <a href="/delete/{{ f }}" class="danger">Delete</a>
+        </div>
+        {% endfor %}
+        {% if not documents %}<p style="color:var(--text-muted); text-align:center;">No documents yet.</p>{% endif %}
+    </div>
+
+</div>
+
+</body>
+</html>
